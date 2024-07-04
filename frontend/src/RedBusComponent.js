@@ -1,19 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import './RedBusComponent.css';
-import Autosuggest from 'react-autosuggest';
 import axios from 'axios';
+import Autosuggest from 'react-autosuggest';
+import './RedBusComponent.css';
 
 const cities = [
-  'New Delhi',
-  'Mumbai',
-  'Bangalore',
-  'Hyderabad',
-  'Ahmedabad',
-  'Chennai',
-  'Kolkata',
-  'Pune',
-  'Jaipur',
-  'Lucknow'
+  'New Delhi', 'Mumbai', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Pune', 'Jaipur', 'Lucknow'
 ];
 
 const getSuggestions = (value) => {
@@ -25,47 +16,17 @@ const getSuggestions = (value) => {
   );
 };
 
-
-const SharedClasses = {
-  flex: 'flex',
-  itemsCenter: 'items-center',
-  spaceX4: 'space-x-4',
-  bgRed500: 'bg-red-500',
-  textWhite: 'text-white',
-  p6: 'p-6',
-  textCenter: 'text-center',
-  mb6: 'mb-6',
-  text2xl: 'text-2xl',
-  fontBold: 'font-bold',
-  justifyCenter: 'justify-center',
-  roundedFull: 'rounded-full',
-  shadowLg: 'shadow-lg',
-  bgWhite: 'bg-white',
-  p4: 'p-4',
-  rounded: 'rounded',
-  textXl: 'text-xl',
-  roundedT3xl: 'rounded-t-3xl',
-  mt12: '-mt-12',
-  gridCols1: 'grid-cols-1',
-  gridCols2: 'grid-cols-2',
-  gridCols4: 'grid-cols-4',
-  gap4: 'gap-4',
-  grid: 'grid',
-  mdGridCols2: 'md:grid-cols-2',
-  lgGridCols4: 'lg:grid-cols-4',
-  textBlue500: 'text-blue-500',
-};
-
 const RedBusComponent = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [date, setDate] = useState('');
   const [bookings, setBookings] = useState([]);
-  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsFrom, setSuggestionsFrom] = useState([]);
+  const [suggestionsTo, setSuggestionsTo] = useState([]);
   const [editIndex, setEditIndex] = useState(null);
 
   useEffect(() => {
-    axios.get('/api/bookings')
+    axios.get('http://localhost:5000/api/bookings')
       .then(response => setBookings(response.data))
       .catch(error => console.error(error));
   }, []);
@@ -74,7 +35,7 @@ const RedBusComponent = () => {
     const newBooking = { from, to, date };
     if (editIndex !== null) {
       const bookingId = bookings[editIndex]._id;
-      axios.put(`/api/bookings/${bookingId}`, newBooking)
+      axios.put(`http://localhost:5000/api/bookings/${bookingId}`, newBooking)
         .then(response => {
           const updatedBookings = bookings.map((booking, index) =>
             index === editIndex ? { ...newBooking, _id: bookingId } : booking
@@ -84,10 +45,8 @@ const RedBusComponent = () => {
         })
         .catch(error => console.error(error));
     } else {
-      axios.post('/api/bookings', newBooking)
-        .then(response => {
-          setBookings([...bookings, { ...newBooking, _id: response.data._id }]);
-        })
+      axios.post('http://localhost:5000/api/bookings', newBooking)
+        .then(response => setBookings([...bookings, { ...newBooking, _id: response.data._id }]))
         .catch(error => console.error(error));
     }
     setFrom('');
@@ -103,16 +62,35 @@ const RedBusComponent = () => {
     setDate(booking.date);
   };
 
-  const onSuggestionsFetchRequested = ({ value }) => {
-    setSuggestions(getSuggestions(value));
+  const handleCompleteJourney = (id) => {
+    console.log("Deleting booking with ID:", id);  // Debugging log
+    axios.delete(`http://localhost:5000/api/bookings/${id}`)
+      .then(response => {
+        console.log("Deletion response:", response.data);  // Debugging log
+        const updatedBookings = bookings.filter(booking => booking._id !== id);
+        setBookings(updatedBookings);
+      })
+      .catch(error => console.error("Deletion error:", error));  // Debugging log
   };
 
-  const onSuggestionsClearRequested = () => {
-    setSuggestions([]);
+  const onSuggestionsFetchRequestedFrom = ({ value }) => {
+    setSuggestionsFrom(getSuggestions(value));
+  };
+
+  const onSuggestionsClearRequestedFrom = () => {
+    setSuggestionsFrom([]);
   };
 
   const onChangeFrom = (event, { newValue }) => {
     setFrom(newValue);
+  };
+
+  const onSuggestionsFetchRequestedTo = ({ value }) => {
+    setSuggestionsTo(getSuggestions(value));
+  };
+
+  const onSuggestionsClearRequestedTo = () => {
+    setSuggestionsTo([]);
   };
 
   const onChangeTo = (event, { newValue }) => {
@@ -120,74 +98,75 @@ const RedBusComponent = () => {
   };
 
   return (
-    <div className={`${SharedClasses.bgRed500} ${SharedClasses.textWhite} ${SharedClasses.p6}`}>
-      <header className={`${SharedClasses.flex} ${SharedClasses.justifyBetween} ${SharedClasses.itemsCenter} ${SharedClasses.mb6}`}>
-        <div className={`${SharedClasses.flex} ${SharedClasses.itemsCenter} ${SharedClasses.spaceX4}`}>
-          <img src={process.env.PUBLIC_URL + '/logo.png'} alt="redBus logo" className="logo" />
-        </div>
+    <div className="container">
+      <header className="header">
+        <img src={process.env.PUBLIC_URL + '/logo.png'} alt="redBus logo" className="logo" />
       </header>
-      <div className={`${SharedClasses.textCenter} ${SharedClasses.mb6}`}>
-        <h1 className={`${SharedClasses.text2xl} ${SharedClasses.fontBold}`}>India's No. 1 Online Bus Ticket Booking Site</h1>
+      <div className="main-content">
+        <h1 className="main-heading">India's No. 1 Online Bus Ticket Booking Site</h1>
       </div>
-      <div className={`${SharedClasses.flex} ${SharedClasses.justifyCenter} ${SharedClasses.itemsCenter} ${SharedClasses.mb6}`}>
-        <div className={`${SharedClasses.bgWhite} ${SharedClasses.p4} ${SharedClasses.roundedFull} ${SharedClasses.shadowLg} ${SharedClasses.flex} ${SharedClasses.itemsCenter} ${SharedClasses.spaceX4}`}>
+      <div className="form-container">
+        <div className="input-group">
           <Autosuggest
-            suggestions={suggestions}
-            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-            onSuggestionsClearRequested={onSuggestionsClearRequested}
+            suggestions={suggestionsFrom}
+            onSuggestionsFetchRequested={onSuggestionsFetchRequestedFrom}
+            onSuggestionsClearRequested={onSuggestionsClearRequestedFrom}
             getSuggestionValue={(suggestion) => suggestion}
-            renderSuggestion={(suggestion) => <div style={{ color: 'black' }}>{suggestion}</div>}
+            renderSuggestion={(suggestion) => <span className="dropdown-item">{suggestion}</span>}
             inputProps={{
               placeholder: 'From',
               value: from,
               onChange: onChangeFrom,
-              className: 'border-none outline-none p-2 text-black'
+              className: 'input-field'
             }}
           />
           <Autosuggest
-            suggestions={suggestions}
-            onSuggestionsFetchRequested={onSuggestionsFetchRequested}
-            onSuggestionsClearRequested={onSuggestionsClearRequested}
+            suggestions={suggestionsTo}
+            onSuggestionsFetchRequested={onSuggestionsFetchRequestedTo}
+            onSuggestionsClearRequested={onSuggestionsClearRequestedTo}
             getSuggestionValue={(suggestion) => suggestion}
-            renderSuggestion={(suggestion) => <div style={{ color: 'black' }}>{suggestion}</div>}
+            renderSuggestion={(suggestion) => <span className="dropdown-item">{suggestion}</span>}
             inputProps={{
               placeholder: 'To',
               value: to,
               onChange: onChangeTo,
-              className: 'border-none outline-none p-2 text-black'
+              className: 'input-field'
             }}
           />
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} className="border-none outline-none p-2 text-black" />
-          <button className="bg-red-500 text-white px-4 py-2 rounded" onClick={handleBookTicket}>Book Ticket</button>
+          <input type="date" className="input-field" value={date} onChange={(e) => setDate(e.target.value)} />
+          <button className="submit-button" onClick={handleBookTicket}>BOOK TICKET</button>
         </div>
       </div>
-      <div className={`${SharedClasses.textCenter} ${SharedClasses.mb6}`}>
-        <h2 className={`${SharedClasses.textXl} ${SharedClasses.fontBold}`}>Apno ko, Sapno ko Kareeb Laaye.</h2>
-      </div>
-      <div className={`${SharedClasses.bgWhite} ${SharedClasses.p6} ${SharedClasses.roundedT3xl} ${SharedClasses.shadowLg} ${SharedClasses.mt12}`}>
-        <table className="min-w-full bg-white">
-          <thead>
-            <tr>
-              <th className="py-2">Origin</th>
-              <th className="py-2">Destination</th>
-              <th className="py-2">Date</th>
-              <th className="py-2">Actions</th>
-            </tr>
-          </thead>
-          <tbody>
-            {bookings.map((booking, index) => (
-              <tr key={index} className="text-black">
-                <td className="py-2">{booking.from}</td>
-                <td className="py-2">{booking.to}</td>
-                <td className="py-2">{booking.date}</td>
-                <td className="py-2">
-                  <button className="text-blue-500" onClick={() => handleEdit(index)}>Edit</button>
-                </td>
+      {bookings.length > 0 && (
+        <div className="table-container">
+          <table className="table">
+            <thead>
+              <tr>
+                <th>From</th>
+                <th>To</th>
+                <th>Date</th>
+                <th>Edit</th>
+                <th>Complete Journey</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+            </thead>
+            <tbody>
+              {bookings.map((booking, index) => (
+                <tr key={booking._id}>
+                  <td>{booking.from}</td>
+                  <td>{booking.to}</td>
+                  <td>{booking.date}</td>
+                  <td>
+                    <button className="edit-button" onClick={() => handleEdit(index)}>Edit</button>
+                  </td>
+                  <td>
+                    <button className="complete-button" onClick={() => handleCompleteJourney(booking._id)}>Complete Journey</button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
     </div>
   );
 };

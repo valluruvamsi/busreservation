@@ -10,27 +10,28 @@ CORS(app)
 client = MongoClient('mongodb://localhost:27017/')
 db = client.bus_reservation
 
-@app.route('/api/buses', methods=['GET'])
-def get_buses():
-    buses = list(db.buses.find({}))
-    return jsonify(buses)
-
 @app.route('/api/bookings', methods=['GET'])
 def get_bookings():
     bookings = list(db.bookings.find({}))
+    for booking in bookings:
+        booking['_id'] = str(booking['_id'])  # Convert ObjectId to string
     return jsonify(bookings)
 
 @app.route('/api/bookings', methods=['POST'])
-def add_booking():
+def create_booking():
     data = request.json
-    booking_id = db.bookings.insert_one(data).inserted_id
-    return jsonify({"message": "Booking successful", "_id": str(booking_id)}), 201
+    result = db.bookings.insert_one(data)
+    return jsonify({"_id": str(result.inserted_id)}), 201
 
 @app.route('/api/bookings/<id>', methods=['PUT'])
 def update_booking(id):
     data = request.json
-    db.bookings.update_one({"_id": ObjectId(id)}, {"$set": data})
-    return jsonify({"message": "Booking updated successfully"}), 200
+    db.bookings.update_one({'_id': ObjectId(id)}, {'$set': data})
+    return jsonify({"message": "Booking updated"}), 200
 
 if __name__ == '__main__':
     app.run(debug=True)
+@app.route('/api/bookings/<id>', methods=['DELETE'])
+def delete_booking(id):
+    db.bookings.delete_one({'_id': ObjectId(id)})
+    return jsonify({"message": "Booking deleted"}), 200
