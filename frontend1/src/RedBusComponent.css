@@ -1,0 +1,68 @@
+/* Shared classes */
+.flex {
+  display: flex;
+}
+.items-center {
+  align-items: center;
+}
+.space-x-4 > :not([hidden]) ~ :not([hidden]) {
+  --space-x-reverse: 0;
+  margin-right: calc(1rem * var(--space-x-reverse));
+  margin-left: calc(1rem * calc(1 - var(--space-x-reverse)));
+}
+.bg-red-500 {
+  background-color: #f56565;
+}
+.text-white {
+  color: #fff;
+}
+.p-6 {
+  padding: 1.5rem;
+}
+.text-center {
+  text-align: center;
+}
+.mb-6 {
+  margin-bottom: 1.5rem;
+}
+.text-2xl {
+  font-size: 1.5rem;
+}
+.font-bold {
+  font-weight: 700;
+}
+.justify-center {
+  justify-content: center;
+}
+.rounded-full {
+  border-radius: 9999px;
+}
+.shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+.bg-white {
+  background-color: #fff;
+}
+.p-4 {
+  padding: 1rem;
+}
+.rounded {
+  border-radius: 0.25rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+}
+.rounded-t-3xl {
+  border-top-left-radius: 1.5rem;
+  border-top-right-radius: 1.5rem;
+}
+.mt-12 {
+  margin-top: 3rem;
+}
+.text-black {
+  color: black;
+}
+.logo {
+  height: 40px; /* Adjust the height as needed */
+  width: auto; /* Maintain aspect ratio */
+}
