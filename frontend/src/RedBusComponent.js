@@ -7,6 +7,8 @@ const cities = [
   'New Delhi', 'Mumbai', 'Bangalore', 'Hyderabad', 'Ahmedabad', 'Chennai', 'Kolkata', 'Pune', 'Jaipur', 'Lucknow'
 ];
 
+const seats = Array.from({ length: 28 }, (_, i) => i + 1); // 4 rows x 7 columns grid
+
 const getSuggestions = (value) => {
   const inputValue = value.trim().toLowerCase();
   const inputLength = inputValue.length;
@@ -20,6 +22,10 @@ const RedBusComponent = () => {
   const [from, setFrom] = useState('');
   const [to, setTo] = useState('');
   const [date, setDate] = useState('');
+  const [name, setName] = useState('');
+  const [mobile, setMobile] = useState('');
+  const [age, setAge] = useState('');
+  const [seat, setSeat] = useState('');
   const [bookings, setBookings] = useState([]);
   const [suggestionsFrom, setSuggestionsFrom] = useState([]);
   const [suggestionsTo, setSuggestionsTo] = useState([]);
@@ -32,7 +38,7 @@ const RedBusComponent = () => {
   }, []);
 
   const handleBookTicket = () => {
-    const newBooking = { from, to, date };
+    const newBooking = { from, to, date, name, mobile, age, seat };
     if (editIndex !== null) {
       const bookingId = bookings[editIndex]._id;
       axios.put(`http://localhost:5000/api/bookings/${bookingId}`, newBooking)
@@ -52,6 +58,10 @@ const RedBusComponent = () => {
     setFrom('');
     setTo('');
     setDate('');
+    setName('');
+    setMobile('');
+    setAge('');
+    setSeat('');
   };
 
   const handleEdit = (index) => {
@@ -60,17 +70,19 @@ const RedBusComponent = () => {
     setFrom(booking.from);
     setTo(booking.to);
     setDate(booking.date);
+    setName(booking.name);
+    setMobile(booking.mobile);
+    setAge(booking.age);
+    setSeat(booking.seat);
   };
 
   const handleCompleteJourney = (id) => {
-    console.log("Deleting booking with ID:", id);  // Debugging log
     axios.delete(`http://localhost:5000/api/bookings/${id}`)
       .then(response => {
-        console.log("Deletion response:", response.data);  // Debugging log
         const updatedBookings = bookings.filter(booking => booking._id !== id);
         setBookings(updatedBookings);
       })
-      .catch(error => console.error("Deletion error:", error));  // Debugging log
+      .catch(error => console.error(error));
   };
 
   const onSuggestionsFetchRequestedFrom = ({ value }) => {
@@ -95,6 +107,10 @@ const RedBusComponent = () => {
 
   const onChangeTo = (event, { newValue }) => {
     setTo(newValue);
+  };
+
+  const handleSeatChange = (seatNumber) => {
+    setSeat(seatNumber);
   };
 
   return (
@@ -134,6 +150,25 @@ const RedBusComponent = () => {
             }}
           />
           <input type="date" className="input-field" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="text" className="input-field" placeholder="Passenger Name" value={name} onChange={(e) => setName(e.target.value)} />
+          <input type="text" className="input-field" placeholder="Mobile Number" value={mobile} onChange={(e) => setMobile(e.target.value)} />
+          <input type="number" className="input-field" placeholder="Age" value={age} onChange={(e) => setAge(e.target.value)} />
+          <div className="seat-selection">
+            <p>Select Seat:</p>
+            <div className="seat-grid">
+              {seats.map(seatNumber => (
+                <label key={seatNumber} className={`seat-label ${seat === seatNumber ? 'selected' : ''}`}>
+                  <input
+                    type="checkbox"
+                    value={seatNumber}
+                    checked={seat === seatNumber}
+                    onChange={() => handleSeatChange(seatNumber)}
+                  />
+                  {seatNumber}
+                </label>
+              ))}
+            </div>
+          </div>
           <button className="submit-button" onClick={handleBookTicket}>BOOK TICKET</button>
         </div>
       </div>
@@ -145,6 +180,10 @@ const RedBusComponent = () => {
                 <th>From</th>
                 <th>To</th>
                 <th>Date</th>
+                <th>Passenger Name</th>
+                <th>Mobile Number</th>
+                <th>Age</th>
+                <th>Seat Number</th>
                 <th>Edit</th>
                 <th>Complete Journey</th>
               </tr>
@@ -155,6 +194,10 @@ const RedBusComponent = () => {
                   <td>{booking.from}</td>
                   <td>{booking.to}</td>
                   <td>{booking.date}</td>
+                  <td>{booking.name}</td>
+                  <td>{booking.mobile}</td>
+                  <td>{booking.age}</td>
+                  <td>{booking.seat}</td>
                   <td>
                     <button className="edit-button" onClick={() => handleEdit(index)}>Edit</button>
                   </td>
